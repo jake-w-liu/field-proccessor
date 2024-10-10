@@ -8,11 +8,11 @@ using Infiltrator
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    rg::Vector{Float64} = [0, 8000]
+    rg::Vector{Float64} = []
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1000
-    folder_name::String = "./tmp/exact/1600/"
+    folder_name::String = "./tmp/const/0/"
 end
 
 function read_field(name, ds = 1, sq = true)
@@ -136,5 +136,5 @@ function process_playback(set)
 end
 
 set = Settings()
-process_forward(set)
+# process_forward(set)
 process_playback(set)
