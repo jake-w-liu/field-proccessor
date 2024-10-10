@@ -1,14 +1,21 @@
 using RadiationPatterns
 using CSV
 using DataFrames
+using FFMPEG
+using PlotlyJS
 using Infiltrator
 
+Base.@kwdef mutable struct Settings
+    step::Int = 12000
+    stop::Int = 120000
+    rg::Vector{Float64} = [0, 8000]
+    sq::Bool = true
+    dg::Int = 2
+    fsize::Int = 1000
+    folder_name::String = "./tmp/exact/1600/"
+end
 
-folder_name = "./tmp/exact/1600"
-step = 120000
-name = folder_name * "/Ez_t" * string(step) * ".field_dump"
-
-function read_field(name, sq = false)
+function read_field(name, ds = 1, sq = true)
     df = CSV.read(name, DataFrame; header=false)
     ny = findall(x -> x == df.Column2[1], df.Column2)[2] - 1
     nx = Int(length(df.Column2)/ny)
@@ -17,8 +24,32 @@ function read_field(name, sq = false)
     if sq
         U .= U.^2
     end
-    Pat = Pattern(U, collect(1:nx), collect(1:ny))
+    x = collect(range(-nx/2*ds, nx/2*ds, nx))
+    y = collect(range(-ny/2*ds, ny/2*ds, ny))
+    Pat = Pattern(U, x, y)
     return Pat
+end
+
+function read_field_raw(name, sq = false)
+    df = CSV.read(name, DataFrame; header=false)
+    ny = findall(x -> x == df.Column2[1], df.Column2)[2] - 1
+    nx = Int(length(df.Column2)/ny)
+    U = transpose(reshape(df.Column3, (ny, nx)))
+    U .= abs.(U) 
+    if sq
+        U .= U.^2
+    end
+    return U
+end
+
+function read_field_raw(name, nx, ny, sq = false)
+    df = CSV.read(name, DataFrame; header=false)
+    U = transpose(reshape(df.Column3, (ny, nx)))
+    U .= abs.(U) 
+    if sq
+        U .= U.^2
+    end
+    return U
 end
 
 function plot_field(Pat, zrange = [])
@@ -29,10 +60,81 @@ function plot_field(Pat, zrange = [])
     end
 end
 
-function create_gif()
-    
+function process_forward(set)
+        
+    name = set.folder_name * "Ez_t" * string(1) * ".field_dump"
+    Pat = read_field(name, 1e-6/3, set.sq)
+    plt = plot_field(Pat, set.rg)
+    figure_name = set.folder_name * "forward_" * lpad(0, set.dg, '0') * ".png"
+    savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+
+    for nt = 1:round(Int, set.stop/set.step)
+        name = set.folder_name * "Ez_t" * string(nt*set.step) * ".field_dump"
+        figure_name = set.folder_name * "forward_" * lpad(nt, set.dg, '0') * ".png"
+        
+        Pat.U .= read_field_raw(name, length(Pat.x),  length(Pat.y), set.sq)
+        react!(plt, plt.plot.data, plt.plot.layout)
+
+        savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+
+        println(nt)
+    end
+
+    framerate = 1
+    png_name = set.folder_name * "forward_" * "%0$(set.dg)d.png"
+    gif_name = set.folder_name * "Ez_forward.gif"
+
+    FFMPEG.ffmpeg_exe(`-framerate $(framerate) -f image2 -i $(png_name) -y $(gif_name)`)
 end
 
-Pat = read_field(name)
-# plot_field(Pat, [0, 10000])
-plot_field(Pat)
+
+function process_playback(set)
+        
+    name = set.folder_name * "Ez_t" * string(1) * ".pi102_field_dump"
+    Pat = read_field(name, 1e-6/3, set.sq)
+    plt = plot_field(Pat, set.rg)
+    figure_name = set.folder_name * "playback_" * lpad(0, set.dg, '0') * ".png"
+    savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+
+    for nt = 1:round(Int, set.stop/set.step)
+        name = set.folder_name * "Ez_t" * string(nt*set.step) * ".pi102_field_dump"
+        figure_name = set.folder_name * "playback_" * lpad(nt, set.dg, '0') * ".png"
+        
+        Pat.U .= read_field_raw(name, length(Pat.x),  length(Pat.y), set.sq)
+        react!(plt, plt.plot.data, plt.plot.layout)
+
+        savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+
+        println(nt)
+    end
+
+    framerate = 1
+    png_name = set.folder_name * "playback_" * "%0$(set.dg)d.png"
+    gif_name = set.folder_name * "Ez_playback.gif"
+
+    FFMPEG.ffmpeg_exe(`-framerate $(framerate) -f image2 -i $(png_name) -y $(gif_name)`)
+end
+
+set = Settings()
+process_forward(set)
+process_playback(set)
