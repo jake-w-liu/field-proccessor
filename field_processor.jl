@@ -4,15 +4,17 @@ using DataFrames
 using FFMPEG
 using PlotlyJS
 using Infiltrator
+# using Thread.@threads
 
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    rg::Vector{Float64} = []
+    rg::Vector{Float64} = [0, 500]
     sq::Bool = true
     dg::Int = 2
-    fsize::Int = 1000
-    folder_name::String = "./tmp/const/0/"
+    fsize::Int = 1800
+    folder_name::String = "./tmp/const/1600/"
+    # folder_name::String = "./tmp/paper_animation/constant_360_0/"
 end
 
 function read_field(name, ds = 1, sq = true)
@@ -60,11 +62,32 @@ function plot_field(Pat, zrange = [])
     end
 end
 
+function process_forward_single(set, stop)
+    name = set.folder_name * "Ez_t" * string(stop) * ".field_dump"
+    Pat = read_field(name, 1e-6/3, set.sq)
+    plt = plot_field(Pat, set.rg)
+
+    update_xaxes!(plt, showticklabels=false)
+    update_yaxes!(plt, showticklabels=false)
+
+    figure_name = set.folder_name * "forward_single_" *  string(stop) * ".png"
+    savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+end
+
 function process_forward(set)
         
     name = set.folder_name * "Ez_t" * string(1) * ".field_dump"
     Pat = read_field(name, 1e-6/3, set.sq)
     plt = plot_field(Pat, set.rg)
+
+    update_xaxes!(plt, showticklabels=false)
+    update_yaxes!(plt, showticklabels=false)
+
     figure_name = set.folder_name * "forward_" * lpad(0, set.dg, '0') * ".png"
     savefig(
             plt,
@@ -98,11 +121,32 @@ function process_forward(set)
 end
 
 
+function process_playback_single(set, stop)
+    name = set.folder_name * "Ez_t" * string(stop) * ".pi102_field_dump"
+    Pat = read_field(name, 1e-6/3, set.sq)
+    plt = plot_field(Pat, set.rg)
+    plt.plot.data[1].colorbar = attr(tickfont=attr(size=32), len=0.9)
+
+    update_xaxes!(plt, showticklabels=false)
+    update_yaxes!(plt, showticklabels=false)
+
+    figure_name = set.folder_name * "playback_single_" *  string(stop) * ".png"
+    savefig(
+            plt,
+            figure_name;
+            height = set.fsize,
+            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+        )
+end
+
 function process_playback(set)
         
     name = set.folder_name * "Ez_t" * string(1) * ".pi102_field_dump"
     Pat = read_field(name, 1e-6/3, set.sq)
     plt = plot_field(Pat, set.rg)
+    update_xaxes!(plt, showticklabels=false)
+    update_yaxes!(plt, showticklabels=false)
+
     figure_name = set.folder_name * "playback_" * lpad(0, set.dg, '0') * ".png"
     savefig(
             plt,
@@ -135,6 +179,9 @@ function process_playback(set)
     FFMPEG.ffmpeg_exe(`-framerate $(framerate) -f image2 -i $(png_name) -y $(gif_name)`)
 end
 
+
 set = Settings()
 # process_forward(set)
-process_playback(set)
+# process_playback(set)
+process_playback_single(set, 24000)
+
