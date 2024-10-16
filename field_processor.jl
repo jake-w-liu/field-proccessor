@@ -9,11 +9,11 @@ using Infiltrator
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    rg::Vector{Float64} = [0, 500]
+    rg::Vector{Float64} = [0, 1000]
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1800
-    folder_name::String = "./tmp/const/1600/"
+    folder_name::String = "./tmp/exact/100/"
     # folder_name::String = "./tmp/paper_animation/constant_360_0/"
 end
 
@@ -62,39 +62,32 @@ function plot_field(Pat, zrange = [])
     end
 end
 
-function process_forward_single(set, stop)
+function process_forward_single(set, stop, figure_name="")
     name = set.folder_name * "Ez_t" * string(stop) * ".field_dump"
     Pat = read_field(name, 1e-6/3, set.sq)
     plt = plot_field(Pat, set.rg)
+    plt.plot.data[1].colorbar = attr(tickfont=attr(size=32), len=0.9)
 
     update_xaxes!(plt, showticklabels=false)
     update_yaxes!(plt, showticklabels=false)
 
-    figure_name = set.folder_name * "forward_single_" *  string(stop) * ".png"
+    if figure_name == ""
+        figure_name = set.folder_name * "forward_single_" *  string(stop) * ".png"
+    end
+
     savefig(
             plt,
             figure_name;
             height = set.fsize,
             width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
         )
+    return Pat, plt
 end
 
 function process_forward(set)
         
-    name = set.folder_name * "Ez_t" * string(1) * ".field_dump"
-    Pat = read_field(name, 1e-6/3, set.sq)
-    plt = plot_field(Pat, set.rg)
-
-    update_xaxes!(plt, showticklabels=false)
-    update_yaxes!(plt, showticklabels=false)
-
     figure_name = set.folder_name * "forward_" * lpad(0, set.dg, '0') * ".png"
-    savefig(
-            plt,
-            figure_name;
-            height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
-        )
+    Pat, plt = process_forward_single(set, 1, figure_name)
 
     for nt = 1:round(Int, set.stop/set.step)
         name = set.folder_name * "Ez_t" * string(nt*set.step) * ".field_dump"
@@ -121,7 +114,7 @@ function process_forward(set)
 end
 
 
-function process_playback_single(set, stop)
+function process_playback_single(set, stop, figure_name="")
     name = set.folder_name * "Ez_t" * string(stop) * ".pi102_field_dump"
     Pat = read_field(name, 1e-6/3, set.sq)
     plt = plot_field(Pat, set.rg)
@@ -129,31 +122,22 @@ function process_playback_single(set, stop)
 
     update_xaxes!(plt, showticklabels=false)
     update_yaxes!(plt, showticklabels=false)
-
-    figure_name = set.folder_name * "playback_single_" *  string(stop) * ".png"
+    if figure_name == ""
+        figure_name = set.folder_name * "playback_single_" *  string(stop) * ".png"
+    end
     savefig(
             plt,
             figure_name;
             height = set.fsize,
             width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
         )
+    return Pat, plt
 end
 
 function process_playback(set)
         
-    name = set.folder_name * "Ez_t" * string(1) * ".pi102_field_dump"
-    Pat = read_field(name, 1e-6/3, set.sq)
-    plt = plot_field(Pat, set.rg)
-    update_xaxes!(plt, showticklabels=false)
-    update_yaxes!(plt, showticklabels=false)
-
     figure_name = set.folder_name * "playback_" * lpad(0, set.dg, '0') * ".png"
-    savefig(
-            plt,
-            figure_name;
-            height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
-        )
+    Pat, plt = process_playback_single(set, 1, figure_name)
 
     for nt = 1:round(Int, set.stop/set.step)
         name = set.folder_name * "Ez_t" * string(nt*set.step) * ".pi102_field_dump"
@@ -181,7 +165,10 @@ end
 
 
 set = Settings()
-# process_forward(set)
-# process_playback(set)
-process_playback_single(set, 24000)
+process_forward(set);
+process_playback(set);
+process_forward_single(set, 12000);
+process_playback_single(set, 12000);
+println()
+
 
