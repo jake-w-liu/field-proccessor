@@ -9,11 +9,11 @@ using Infiltrator
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    rg::Vector{Float64} = [0, 1000]
+    rg::Vector{Float64} = []
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1800
-    folder_name::String = "./tmp/exact/100/"
+    folder_name::String = "./tmp/test/"
     # folder_name::String = "./tmp/paper_animation/constant_360_0/"
 end
 
@@ -165,9 +165,9 @@ end
 
 
 set = Settings()
-process_forward(set);
+# process_forward(set);
 process_playback(set);
-process_forward_single(set, 12000);
+# process_forward_single(set, 12000);
 process_playback_single(set, 12000);
 println()
 

@@ -7,7 +7,7 @@ using Infiltrator
 # using Thread.@threads
 
 
-folder_name = "./tmp/const/1600/"
+folder_name = "./tmp/test/"
 
 
 function read_interface(name, ds = 1, sq = true)
@@ -65,7 +65,7 @@ function process_interface(folder_name)
         xrange = [-20, 20],
     )
     fig.plot.layout.showlegend = false
-    # fig.plot.layout.legend = attr(xanchor = "right", yanchor = "top", x = 0.98, y = 0.95)
+    fig.plot.layout.legend = attr(xanchor = "right", yanchor = "top", x = 0.98, y = 0.95)
     fig.plot.data[1].line = attr(width=1) 
     fig.plot.data[2].line = attr(width=1, dash="dash") 
     react!(fig, fig.plot.data, fig.plot.layout)
@@ -80,4 +80,33 @@ function process_interface(folder_name)
 end
 
 process_interface(folder_name)
+
+# multi
+# intf = read_interface("tmp/exact/100/interface_amp.dat", 1/3, false)
+# inte = read_interface("tmp/exact/100/interface_amp_pi.dat", 1/3, false)
+# intca = read_interface("tmp/const/100/interface_amp_pi.dat", 1/3, false)
+# intca30 = read_interface("tmp/const_30/100/interface_amp_pi.dat", 1/3, false)
+
+# fig = ptn_2d(
+#         [intca, intca30, inte, intf],
+#         dims=2,
+#         name=["playback - CA full","playback - CA 30°","playback - exact", "forward"],
+#         mode=["lines"],
+#         color=["red", "coral", "deeppink","blue"],
+#         xlabel="position (µm)",
+#         ylabel="amplitude (a.u.)",
+#         xrange = [-20, 20],
+#     )
+#     fig.plot.layout.legend = attr(xanchor = "right", yanchor = "top", x = 0.98, y = 0.98)
+#     # fig.plot.data[1].line = attr(width=1) 
+#     fig.plot.data[4].line = attr(dash="dash") 
+#     react!(fig, fig.plot.data, fig.plot.layout)
+
+#     savefig(
+#         fig,
+#         "interface_plot_zoom.png" ;
+#         height = 500,
+#         width = 550,
+#     )
+
 
