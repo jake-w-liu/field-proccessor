@@ -13,7 +13,7 @@ Base.@kwdef mutable struct Settings
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1800
-    folder_name::String = "./tmp/test/"
+    folder_name::String = "./tmp/const_180_y/1600/"
     # folder_name::String = "./tmp/paper_animation/constant_360_0/"
 end
 
