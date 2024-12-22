@@ -9,12 +9,16 @@ using Infiltrator
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    rg::Vector{Float64} = []
+    # rg::Vector{Float64} = []
+    rg::Vector{Float64} = [0, 1600]
+    # xrange = []
+    # yrange = []
+    xrange = [-50e-6, 150e-6]
+    yrange = [-100e-6, 100e-6]
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1800
-    # folder_name::String = "./tmp/const_180_y/1600/"
-    folder_name::String =  "../exact/180/1600/-y_nosink/"
+    folder_name::String = "./tmp/20241216_density_2um/constant/density_0.500/radius_0.5/"
     # folder_name::String = "./tmp/paper_animation/constant_360_0/"
 end
 
@@ -72,6 +76,13 @@ function process_forward_single(set, stop, figure_name="")
     update_xaxes!(plt, showticklabels=false)
     update_yaxes!(plt, showticklabels=false)
 
+    if !isempty(set.xrange)
+        plt.plot.layout.xaxis[:range] = set.xrange
+    end
+    if !isempty(set.yrange)
+        plt.plot.layout.yaxis[:range] = set.yrange
+    end
+
     if figure_name == ""
         figure_name = set.folder_name * "forward_single_" *  string(stop) * ".png"
     end
@@ -123,6 +134,13 @@ function process_playback_single(set, stop, figure_name="")
 
     update_xaxes!(plt, showticklabels=false)
     update_yaxes!(plt, showticklabels=false)
+    if !isempty(set.xrange)
+        plt.plot.layout.xaxis[:range] = set.xrange
+    end
+    if !isempty(set.yrange)
+        plt.plot.layout.yaxis[:range] = set.yrange
+    end
+    react!(plt, plt.plot.data, plt.plot.layout)
     if figure_name == ""
         figure_name = set.folder_name * "playback_single_" *  string(stop) * ".png"
     end
@@ -167,9 +185,9 @@ end
 
 set = Settings()
 # process_forward(set);
-process_playback(set);
+# process_playback(set);
 # process_forward_single(set, 12000);
-process_playback_single(set, 12000);
+process_playback_single(set, 120000);
 println()
 
 
