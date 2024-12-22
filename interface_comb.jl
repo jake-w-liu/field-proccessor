@@ -8,7 +8,7 @@ using Infiltrator
 
 
 # folder_name = "./tmp/const_180_y/1600/"
-folder_name = "../exact/90/+x/"
+folder_name = "./tmp/exact_360_20000/200/"
 
 
 function read_interface(name, ds = 1, sq = true)
@@ -26,15 +26,20 @@ function read_interface(name, ds = 1, sq = true)
     return Pat
 end
 
-function process_interface(folder_name, forward=true)
+function process_interface_comb(folder_name, forward=true)
     if forward
-        name = folder_name * "interface_amp.dat" 
+        # name = folder_name * "interface_amp.dat" 
+        name = folder_name * "inc_right_amp.dat" 
         intf = read_interface(name, 1/3, false)
     else
         intf = []
     end
-    name = folder_name * "interface_amp_pi.dat" 
+    # name = folder_name * "interface_amp_pi.dat" 
+    name = folder_name * "inc_right_amp_pi.dat" 
     intp = read_interface(name, 1/3, false)
+    println(sum(intf.U))
+    println(sum(intp.U))
+
     # @infiltrate
     fig = ptn_2d(
         [intp, intf],
@@ -84,7 +89,7 @@ function process_interface(folder_name, forward=true)
     return nothing
 end
 
-process_interface(folder_name)
+process_interface_comb(folder_name)
 
 # multi
 # intf = read_interface("tmp/exact/100/interface_amp.dat", 1/3, false)
