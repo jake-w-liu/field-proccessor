@@ -10,16 +10,18 @@ Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
     # rg::Vector{Float64} = []
-    rg::Vector{Float64} = [0, 1600]
+    rg::Vector{Float64} = [0, 2000]
     # xrange = []
     # yrange = []
-    xrange = [-50e-6, 150e-6]
+    # xrange = [-50e-6, 150e-6]
+    # yrange = [-100e-6, 100e-6]
+    xrange = [0e-6, 100e-6]
     yrange = [-100e-6, 100e-6]
     sq::Bool = true
     dg::Int = 2
     fsize::Int = 1800
-    folder_name::String = "./tmp/20241216_density_2um/constant/density_0.500/radius_0.5/"
-    # folder_name::String = "./tmp/paper_animation/constant_360_0/"
+    # folder_name::String = "./tmp/20241216_density_2um/exact/density_0.500/radius_8/"
+    folder_name::String = "./tmp/const/1600/"
 end
 
 function read_field(name, ds = 1, sq = true)
@@ -91,7 +93,7 @@ function process_forward_single(set, stop, figure_name="")
             plt,
             figure_name;
             height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+            width = round(Int, set.fsize / (set.xrange[2] - set.xrange[1]) *(set.yrange[2] - set.yrange[1])),
         )
     return Pat, plt
 end
@@ -112,7 +114,7 @@ function process_forward(set)
             plt,
             figure_name;
             height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+            width = round(Int, set.fsize / (set.xrange[2] - set.xrange[1]) *(set.yrange[2] - set.yrange[1])),
         )
 
         println(nt)
@@ -144,11 +146,12 @@ function process_playback_single(set, stop, figure_name="")
     if figure_name == ""
         figure_name = set.folder_name * "playback_single_" *  string(stop) * ".png"
     end
+
     savefig(
             plt,
             figure_name;
             height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+            width = round(Int, set.fsize /(set.yrange[2] - set.yrange[1]) *(set.xrange[2] - set.xrange[1])),
         )
     return Pat, plt
 end
@@ -169,7 +172,7 @@ function process_playback(set)
             plt,
             figure_name;
             height = set.fsize,
-            width = round(Int, set.fsize / (Pat.x[2] - Pat.x[1]) *(Pat.y[2] - Pat.y[1])),
+            width = round(Int, set.fsize / (set.xrange[2] - set.xrange[1]) *(set.yrange[2] - set.yrange[1])),
         )
 
         println(nt)
@@ -186,7 +189,7 @@ end
 set = Settings()
 # process_forward(set);
 # process_playback(set);
-# process_forward_single(set, 12000);
+# process_forward_single(set, 120000);
 process_playback_single(set, 120000);
 println()
 
