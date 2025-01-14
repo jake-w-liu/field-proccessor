@@ -9,15 +9,15 @@ using Infiltrator
 Base.@kwdef mutable struct Settings
     step::Int = 12000
     stop::Int = 120000
-    # rg::Vector{Float64} = []
-    rg::Vector{Float64} = [0, 2000]
+    rg::Vector{Float64} = []
+    # rg::Vector{Float64} = [0, 2000]
     # xrange = []
     # yrange = []
     # xrange = [-50e-6, 150e-6]
     # yrange = [-100e-6, 100e-6]
     xrange = [0e-6, 100e-6]
-    yrange = [-100e-6, 100e-6]
-    sq::Bool = true
+    yrange = [-50e-6, 50e-6]
+    sq::Bool = false
     dg::Int = 2
     fsize::Int = 1800
     # folder_name::String = "./tmp/20241216_density_2um/exact/density_0.500/radius_8/"
@@ -193,4 +193,4 @@ set = Settings()
 process_playback_single(set, 120000);
 println()
 
-
+## time-domain interface comparison
